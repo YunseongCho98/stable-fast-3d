@@ -1,129 +1,65 @@
-# SF3D: Stable Fast 3D Mesh Reconstruction with UV-unwrapping and Illumination Disentanglement
+# 🌀 Stable-Fast-3D Inference Script
 
-<a href="https://arxiv.org/abs/2408.00653"><img src="https://img.shields.io/badge/Arxiv-2408.00653-B31B1B.svg"></a> <a href="https://huggingface.co/stabilityai/stable-fast-3d"><img src="https://img.shields.io/badge/%F0%9F%A4%97%20Model_Card-Huggingface-orange"></a> <a href="https://huggingface.co/spaces/stabilityai/stable-fast-3d"><img src="https://img.shields.io/badge/%F0%9F%A4%97%20Gradio%20Demo-Huggingface-orange"></a>
+이 저장소는 [**Stable Fast 3D**](https://huggingface.co/stabilityai/stable-fast-3d) 모델을 활용하여 **2D 인물 이미지로부터 3D 메쉬(.glb)** 를 생성하는 파이프라인을 제공합니다.  
+배경 제거, 전처리, 모델 추론 및 메쉬 저장까지 한번에 수행할 수 있습니다.
 
-<div align="center">
-  <img src="demo_files/teaser.gif" alt="Teaser">
-</div>
+## 🔧 설치 방법
 
-<br>
-
-This is the official codebase for **Stable Fast 3D**, a state-of-the-art open-source model for **fast** feedforward 3D mesh reconstruction from a single image.
-
-<br>
-
-<p align="center">
-    <img width="450" src="demo_files/comp.gif"/>
-</p>
-
-<p align="center">
-    <img width="450" src="demo_files/scatterplot.jpg"/>
-</p>
-
-Stable Fast 3D is based on [TripoSR](https://github.com/VAST-AI-Research/TripoSR) but introduces several new key techniques. For one, we explicitly optimize our model to produce good meshes without artifacts alongside textures with UV unwrapping. We also delight the color and predict material parameters so the assets can be easily integrated into a game. We achieve all of this while still maintaining the fast inference speeds of TripoSR.
-
-## Getting Started
-
-### Installation
-
-Ensure your environment is:
-- Python >= 3.8
-- Optional: CUDA or MPS has to be available
-- For Windows **(experimental)**: Visual Studio 2022
-- Has PyTorch installed according to your platform: https://pytorch.org/get-started/locally/ [Make sure the Pytorch CUDA version matches your system's.]
-- Update setuptools by `pip install -U setuptools==69.5.1`
-- Install wheel by `pip install wheel`
-
-Then, install the remaining requirements with `pip install -r requirements.txt`.
-For the gradio demo, an additional `pip install -r requirements-demo.txt` is required.
-
-### Requesting Access and Login
-
-Our model is gated at [Hugging Face](https://huggingface.co):
-
-1. Log in to Hugging Face and request access [here](https://huggingface.co/stabilityai/stable-fast-3d).
-2. Create an access token with read permissions [here](https://huggingface.co/settings/tokens).
-3. Run `huggingface-cli login` in the environment and enter the token.
-
-### Support for MPS (for Mac Silicon) **(experimental)**
-
-Stable Fast 3D can also run on Macs via the MPS backend, with the texture baker using custom metal kernels similar to the corresponding CUDA kernels.
-
-Note that support is **experimental** and not guaranteed to give the same performance and/or quality as the CUDA backend.
-
-You will need to install OpenMP runtime to enable clang support for `-fopenmp`. Follow the tutorial here https://mac.r-project.org/openmp/ 
-
-MPS backend support was tested on M1 max 64GB with the latest PyTorch nightly release. We recommend you install the latest PyTorch (2.4.0 as of writing) and/or the nightly version to avoid any issues that my arise with older PyTorch versions.
-
-You also need to run the code with `PYTORCH_ENABLE_MPS_FALLBACK=1`.
-
-MPS currently consumes more memory compared to the CUDA PyTorch backend. We recommend running the CPU version if your system has less than 32GB of unified memory.
-
-### Windows Support **(experimental)**
-
-To run Stable Fast 3D on Windows, you must install Visual Studio (currently tested on VS 2022) and the appropriate PyTorch and CUDA versions.
-Then, follow the installation steps as mentioned above.
-
-Note that Windows support is **experimental** and not guaranteed to give the same performance and/or quality as Linux.
-
-### CPU Support
-
-CPU backend will automatically be used if no GPU is detected in your system.
-
-If you have a GPU but are facing issues and want to use the CPU backend instead, set the environment variable `SF3D_USE_CPU=1` to force the CPU backend.
-
-### Manual Inference
-
-```sh
-python run.py demo_files/examples/chair1.png --output-dir output/
-```
-This will save the reconstructed 3D model as a GLB file to `output/`. You can also specify more than one image path separated by spaces. The default options takes about **6GB VRAM** for a single image input.
-
-You may also use `--texture-resolution` to specify the resolution in pixels of the output texture and `--remesh_option` to specify the remeshing operation (None, Triangle, Quad).
-
-For detailed usage of this script, use `python run.py --help`.
-
-### Local Gradio App
-
-```sh
-python gradio_app.py
+```bash
+git clone https://github.com/<your-org-or-username>/stable-fast-3d-inference.git
+cd stable-fast-3d-inference
+python -m venv env
+source env/bin/activate   # on Windows: env\Scripts\activate
+pip install -r requirements.txt
 ```
 
+### ⚠️ 요구사항
+- Python 3.9+
+- PyTorch >= 2.0
+- rembg
+- PIL, tqdm 등
 
-## ComfyUI extension
+## 🚀 사용법
 
-Custom nodes and an [example workflow](./demo_files/workflows/sf3d_example.json) are provided for [ComfyUI](https://github.com/comfyanonymous/ComfyUI).
-
-To install:
-
-* Clone this repo into ```custom_nodes```:
- ```shell
-  $ cd ComfyUI/custom_nodes
-  $ git clone https://github.com/Stability-AI/stable-fast-3d
- ```
-* Install dependencies:
- ```shell
-  $ cd stable-fast-3d
-  $ pip install -r requirements.txt
- ```
-* Restart ComfyUI
-
-## Remesher Options:
-
-  -`none`: mesh unchanged after generation. No CPU overhead.
-
-  -`triangle`: verticies and edges are rearranged to form a triangle topography. Implementation is from: *"[A Remeshing Approach to Multiresolution Modeling](https://github.com/sgsellan/botsch-kobbelt-remesher-libigl)" by M. Botsch and L. Kobbelt*. CPU overhead expected.
-
-  -`quad`: verticies and edges are rearanged in quadrilateral topography with a proper quad flow. The quad mesh is split into triangles for export with GLB. Implementation is from *"[Instant Field-Aligned Meshes](https://github.com/wjakob/instant-meshes)" from Jakob et al.*. CPU overhead expected.
-
-Additionally the target vertex count can be specified. This is not a hard constraint but a rough vertex count the method aims to create. This target is ignored if the remesher is set to `none`.
-
-## Citation
-```BibTeX
-@article{sf3d2024,
-  title={SF3D: Stable Fast 3D Mesh Reconstruction with UV-unwrapping and Illumination Disentanglement},
-  author={Boss, Mark and Huang, Zixuan and Vasishta, Aaryaman and Jampani, Varun},
-  journal={arXiv preprint},
-  year={2024}
-}
+```bash
+python run.py path/to/image_or_folder \
+  --device cuda \
+  --pretrained-model stabilityai/stable-fast-3d \
+  --foreground-ratio 0.85 \
+  --output-dir output/ \
+  --texture-resolution 1024 \
+  --remesh_option none \
+  --target_vertex_count -1 \
+  --batch_size 1
 ```
+
+### 주요 인자 설명
+| 옵션 | 설명 | 기본값 |
+|--------|-------|--------|
+| `image` | 입력 이미지 또는 폴더 경로 | 필수 |
+| `--device` | `cuda`, `mps`, 또는 `cpu` | 자동 탐지 |
+| `--pretrained-model` | Huggingface 모델 ID 또는 로컬 경로 | `stabilityai/stable-fast-3d` |
+| `--foreground-ratio` | 전경 크기를 조절하는 비율 (0~1) | 0.85 |
+| `--output-dir` | 결과물 저장 디렉토리 | `output/` |
+| `--texture-resolution` | 텍스처 맵 해상도 | 1024 |
+| `--remesh_option` | 메쉬 리메싱 옵션 (`none`, `triangle`, `quad`) | `none` |
+| `--target_vertex_count` | 리덕션 대상 정점 수 (-1: 비활성화) | -1 |
+| `--batch_size` | 배치 사이즈 | 1 |
+
+## 🖼️ 출력 예시
+
+- `output/0/input.png`: 전처리된 입력 이미지
+- `output/0/mesh.glb`: 생성된 3D 메쉬 파일 (GLB 포맷)
+
+## 🧠 동작 방식
+
+1. rembg를 통해 배경 제거
+2. 설정된 전경 비율로 리사이즈
+3. Stable-Fast-3D 모델로 3D 메쉬 생성
+4. glTF(.glb) 형식으로 결과 저장
+
+## 📌 참고 및 출처
+
+- 모델 출처: [Stability AI - stable-fast-3d](https://huggingface.co/stabilityai/stable-fast-3d)
+- 코드 일부는 `sf3d.system`, `sf3d.utils` 모듈에 기반하여 작성되었습니다.
+- rembg 배경 제거 기능은 [danielgatis/rembg](https://github.com/danielgatis/rembg) 프로젝트를 사용합니다.
