@@ -50,7 +50,6 @@ python run.py path/to/image_or_folder \
 
 - `output/0/input.png`: 전처리된 입력 이미지
 - `output/0/mesh.glb`: 생성된 3D 메쉬 파일 (GLB 포맷)
-- `/Users/yun-seungcho/Downloads/stable-fast-3d/output/2/mesh.glb`: 네 번째 입력에 대한 출력 3D 메쉬 파일 불러오기 목적의 예시
 
 ## 🧠 동작 방식
 
