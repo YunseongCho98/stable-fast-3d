@@ -63,3 +63,4 @@ python run.py path/to/image_or_folder \
 - 모델 출처: [Stability AI - stable-fast-3d](https://huggingface.co/stabilityai/stable-fast-3d)
 - 코드 일부는 `sf3d.system`, `sf3d.utils` 모듈에 기반하여 작성되었습니다.
 - rembg 배경 제거 기능은 [danielgatis/rembg](https://github.com/danielgatis/rembg) 프로젝트를 사용합니다.
+# BS-LDM
